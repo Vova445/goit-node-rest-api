@@ -1,21 +1,21 @@
-import contactsService from "../services/contactsServices.js";
-import {createContactSchema, updateContactSchema} from '../schemas/contactsSchemas.js'
+import { createContactSchema, updateContactSchema } from '../schemas/contactsSchemas.js';
+import {listContacts,getContactById,removeContact,addContact, updContact} from "../services/contactsServices.js";
+import HttpError from "../helpers/HttpError.js";
+import validateBody from "../helpers/validateBody.js";
 
-export const getAllContacts = (req, res) => {
-    try{
-        const contacts = contactsService.listContacts();
+export const getAllContacts = async (req, res) => {
+    try {
+        const contacts = await listContacts(); 
         res.status(200).json(contacts);
-
-    }
-    catch(error){
+    } catch(error) {
         res.status(500).json({ message : error.message })
     }
 };
 
-export const getOneContact = (req, res) => {
+export const getOneContact = async (req, res) => {
     try {
         const contactId = req.params.id;
-        const contact =contactsService.getContactById(contactId);
+        const contact = await getContactById(contactId);
 
         if(contact){
             res.status(200).json(contact);
@@ -25,14 +25,14 @@ export const getOneContact = (req, res) => {
         }
     }
     catch(error){
-        res.status(500).json({ message: message.error})
+        res.status(500).json({ message: error.message})
     }
 };
 
-export const deleteContact = (req, res) => {
+export const deleteContact = async (req, res) => {
     try{
         const contactId = req.params.id;
-        const deletedContact = contactsService.removeContact(contactId);
+        const deletedContact = await removeContact(contactId);
 
         if(deletedContact){
             res.status(200).json(deletedContact);
@@ -42,43 +42,42 @@ export const deleteContact = (req, res) => {
         }
     }
     catch(error){
-        res.status(500).json({message : message.error})
+        res.status(500).json({message : error.message})
     }
 };
 
-export const createContact = (req, res) => {
-    try{
-        const {error, value} = createContactSchema.validate(req.body);
-
-        if(error){
-            res.status(400).json({message : error.message})
-            return
-        }
-        const newContact = contactsService.addContact(value);
-        res.status(201).json(newContact);
+export const createContact = async (req, res, next) => {
+    try {
+        validateBody(createContactSchema)(req, res, async () => {
+            const { error, value } = createContactSchema.validate(req.body);
+            if (error) {
+                return next(HttpError(400, error.message));
+            }
+            const { name, email, phone } = value;
+            const newContact = await addContact(name, email, phone); 
+            res.status(201).json(newContact);
+        });
+    } catch (error) {
+        next(error);
     }
-    catch(error){
-        res.status(500).json({ message: error.message })
+};
+
+export const updateContact = async (req, res, next) => {
+    try {
+        validateBody(updateContactSchema)(req, res, async () => {
+            const { error, value } = updateContactSchema.validate(req.body);
+            if (error) {
+                return next(HttpError(400, error.message));
+            }
+            const contactId = req.params.id;
+            const updatedContact = await updContact(contactId, value);
+            if (!updatedContact) {
+                return next(HttpError(404, "Not Found"));
+            }
+            res.status(200).json(updatedContact);
+        });
+    } catch (error) {
+        next(error);
     }
 };
 
-export const updateContact = (req, res) => {
-    try{
-        const contactId = req.params.id;
-        const{error, value} = updateContactSchema.validate(req.body);
-
-        if(error){
-            res.status(400).json({message : error.message})
-            return;
-        }
-        const updatedContact = contactsService.updateContact(contactId, value);
-        if(!updatedContact){
-            res.status(404).json({ message: "Not Found"})
-            return;
-        }
-        res.status(200).json(updatedContact)
-    }
-    catch(error){
-        res.status(500).json({ message: error.message })
-    }
-};

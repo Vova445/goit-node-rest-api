@@ -1,7 +1,10 @@
-const fs = require("node:fs/promises");
-const path = require("path");
+import fs from "node:fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const contactsPath = path.join(__dirname, "./db/contacts.json");
+const contactsPath = path.join(__dirname, "../db/contacts.json");
 
 async function listContacts() {
   try {
@@ -41,20 +44,20 @@ async function removeContact(contactId) {
 
 async function addContact(name, email, phone) {
   try {
-    const data = await fs.readFile(contactsPath, { encoding: "utf8" });
-    const contacts = JSON.parse(data);
-    const newContact = { id: Date.now().toString(), name, email, phone };
-    contacts.push(newContact);
-    await fs.writeFile(contactsPath, JSON.stringify(contacts));
-    return newContact;
+      const data = await fs.readFile(contactsPath, { encoding: "utf8" });
+      const contacts = JSON.parse(data);
+      const newContact = { id: Date.now().toString(), name, email, phone };
+      contacts.push(newContact);
+      await fs.writeFile(contactsPath, JSON.stringify(contacts));
+      return newContact;
   } catch (error) {
-    console.error("Error adding contact:", error);
-    return null;
+      console.error("Error adding contact:", error);
+      return null;
   }
 }
 
 
-async function updateContact(contactId, updatedData) {
+async function updContact(contactId, updatedData) {
     try {
       const data = await fs.readFile(contactsPath, { encoding: "utf8" });
       let contacts = JSON.parse(data);
@@ -77,4 +80,4 @@ async function updateContact(contactId, updatedData) {
   }
   
 
-module.exports = { listContacts, getContactById, removeContact, addContact, updateContact };
+  export { listContacts, getContactById, removeContact, addContact, updContact };

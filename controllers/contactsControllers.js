@@ -93,10 +93,10 @@ export const updateStatusContact = async (req, res, next) => {
         return next(HttpError(400, error.message));
       }
       const { favorite } = value;
-      const { contactId } = req.params;
+      const { id } = req.params;
 
       const updatedContact = await Contact.findByIdAndUpdate(
-        contactId,
+        id,
         { favorite },
         { new: true }
       );

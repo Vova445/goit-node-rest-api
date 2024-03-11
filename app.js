@@ -3,6 +3,7 @@ import morgan from "morgan";
 import cors from "cors";
 import './db/db.js'
 import authRouter from "./routes/authRouter.js";
+
 import contactsRouter from "./routes/contactsRouter.js";
 
 const app = express();

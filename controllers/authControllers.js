@@ -58,7 +58,7 @@ export const logout = async (req, res, next) => {
     try {
         const user = await User.findById(req.user._id);
         if (!user) {
-            return res.status(401).json({ message: "Not authorized" });
+            return res.status(401).json({ message: "Not Authorized" });
         }
         user.token = null;
         await user.save();

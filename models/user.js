@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import gravatar from 'gravatar';
 
 const userSchema = new mongoose.Schema(
   {
@@ -21,15 +20,8 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
-    avatarURL: {
-      type: String,
-      default: function() {
-        return gravatar.url(this.email, { d: 'identicon' }, true);
-      }
-    }
   },
   { versionKey: false }
 );
-
 const User = mongoose.model("user", userSchema);
 export default User;

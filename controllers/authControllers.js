@@ -1,9 +1,6 @@
 import User from "../models/user.js";
 import bcrypt from 'bcrypt';
 import jwt from "jsonwebtoken";
-import path from "path";
-import fs from "fs";
-import jimp from "jimp";
 
 export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -24,14 +21,13 @@ export const register = async (req, res, next) => {
         res.status(201).json({
             user: {
                 email,
-                subscription: createUser.subscription,
+                subscription: createUser.subscription
             }
         });
     } catch (error) {
         next(error);
     }
 };
-
 export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const nEmail = email.toLowerCase();
@@ -48,12 +44,16 @@ export const login = async (req, res, next) => {
         
         await User.findByIdAndUpdate(user._id, { token });
         
-        res.status(200).json({ token });
+        res.status(200).json({ token,
+        user: {
+        email: user.email,
+        subscription: user.subscription,
+            } 
+    });
     } catch (error) {
         next(error);
     }
 };
-
 export const logout = async (req, res, next) => {
     try {
         const user = await User.findById(req.user._id);
@@ -67,33 +67,10 @@ export const logout = async (req, res, next) => {
         next(error);
     }
 };
-
 export const current = async (req, res, next) => {
     try {
-        const { email, subscription, avatarURL } = req.user;
-        res.status(200).json({ user: { email, subscription, avatarURL } });
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-export const updateAvatar = async (req, res, next) => {
-    try {
-        const userId = req.user._id;
-        const publicPath = path.resolve("public");
-        if (!req.file) {
-            return res.status(400).json({ message: 'Avatar file is required' });
-        }
-        const avatar = await jimp.read(req.file.path);
-        await avatar.cover(250, 250).writeAsync(req.file.path);
-        const avatarName = `${userId}${path.extname(req.file.originalname)}`;
-        const avatarURL = `/avatars/${avatarName}`;
-        await fs.promises.rename(req.file.path, path.join(publicPath, 'avatars', avatarName));
-        await User.findByIdAndUpdate(userId, { avatarURL });
-        const updatedUser = await User.findByIdAndUpdate(userId, { avatarURL }, { new: true });
-
-        res.status(200).json({ user: updatedUser });
+        const { email, subscription } = req.user;
+        res.status(200).json({ user: { email, subscription } });
     } catch (error) {
         next(error);
     }

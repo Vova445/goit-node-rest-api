@@ -26,7 +26,15 @@ const userSchema = new mongoose.Schema(
       default: function() {
         return gravatar.url(this.email, { d: 'identicon' }, true);
       }
-    }
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      required: [true, 'Verify token is required'],
+    },
   },
   { versionKey: false }
 );

@@ -1,5 +1,5 @@
 import express from "express";
-import { register, login, logout, current, updateAvatar } from "../controllers/authControllers.js";
+import { register, login, logout, current, updateAvatar, verificationToken, verificationTokenRepeat } from "../controllers/authControllers.js";
 import authMiddleware from "../helpers/authMiddleware.js";
 import multer from "multer";
 import path from "path";
@@ -15,5 +15,7 @@ authRouter.get("/current", authMiddleware, current);
 authRouter.patch("/avatars", authMiddleware, upload.single("avatar"), (req, res, next) => {
     updateAvatar(req, res, next, path.resolve("public"));
 });
+authRouter.post("/verify", verificationTokenRepeat)
+authRouter.get("/verify/:verificationToken", verificationToken);
 
 export default authRouter;
